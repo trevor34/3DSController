@@ -8,7 +8,7 @@ The latest release will always be downloadable from [here](https://github.com/CT
 If you are updating to 0.6 from an older version, you will need to make sure you update vJoy to the recommended version.
 
 ### Building
-Released version of this fork was built with mingw32-make (open cmd in PC folder directory and call mingw32-make.exe externally), using a MinGW installation with the 2013072200 version of mingw32-base-bin package
+Released version of this fork (https://github.com/marinesciencedude/3DSController/releases/tag/0.7.2-LMB) was built with mingw32-make (open cmd in PC folder directory and call mingw32-make.exe externally), using a MinGW installation with the 2013072200 version of mingw32-base-bin package
 
 ### Setup and Usage
 Firstly, if you want to be able to register the circle pad or touch screen as a joystick you will need to install [vJoy (version 2.0.5-120515 is preferable)](http://sourceforge.net/projects/vjoystick/files/Beta%202.x/2.0.5-120515/vJoy_205_050515.exe/download). However, if you just want to use keyboard buttons, this is not necessary.

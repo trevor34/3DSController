@@ -16,6 +16,7 @@ struct settings defaultSettings = {
 	cStick: joystick2,
 	touch: mouse,
 	mouseSpeed: 4,
+	mouseClick: 0,
 	vJoyDevice: 1,
 	A: { 1, {'A'} },
 	B: { 1, {'B'} },

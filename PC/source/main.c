@@ -77,6 +77,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 	
 	startListening();
 	
+	bool mouseLastActive = false; //Keep track of whether the mouse was moved by the touch screen during the last cycle
+	
 	while(1) {
 		memset(&buffer, 0, sizeof(struct packet));
 		
@@ -161,6 +163,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 				if(newpress(KEY_TOUCH)) {
 					lastTouch.x = currentTouch.x;
 					lastTouch.y = currentTouch.y;
+				} else if(mouseLastActive & settings.mouseClick) //if newpress isn't KEY_TOUCH then release Left Mouse Button
+				{
+					mouseLastActive = false;
+					simulateKeyRelease(VK_LBUTTON);
 				}
 				
 				if((currentKeys & KEY_TOUCH)) {
@@ -174,6 +180,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 						}
 					}
 					else if(settings.touch == mouse) {
+						if(settings.mouseClick & !(mouseLastActive)) //only press Left Mouse Button if mouse hasn't moved in the last cycle
+						{
+							mouseLastActive = true;
+							simulateKeyNewpress(VK_LBUTTON);
+						}
+						
 						if(settings.mouseSpeed) {
 							POINT p;
 							GetCursorPos(&p);

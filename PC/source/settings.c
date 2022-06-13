@@ -161,6 +161,11 @@ bool readSettings(void) {
 		sscanf(setting, "%d", &settings.mouseSpeed);
 	}
 	
+	if(getSetting("Mouse Click: ", buffer, setting))
+	{
+		sscanf(setting, "%d", &settings.mouseClick);
+	}
+	
 	if(getSetting("vJoy Device: ", buffer, setting)) {
 		sscanf(setting, "%d", &settings.vJoyDevice);
 	}

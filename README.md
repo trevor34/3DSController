@@ -14,7 +14,7 @@ Released version of this fork (https://github.com/marinesciencedude/3DSControlle
 cd 3DSController-0.7.2\PC
 ```
 ```
-C:\MinGW\binmingw32-make.exe
+C:\MinGW\bin\mingw32-make.exe
 ```
 
 ### Setup and Usage

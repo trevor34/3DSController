@@ -119,6 +119,11 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 			case KEYS:
 				lastKeys = currentKeys;
 				if(currentKeys & KEY_TOUCH) lastTouch = currentTouch;
+				else //if currentKeys is not KEY_TOUCH then release Left Mouse Button
+				{
+					simulateKeyRelease(VK_LBUTTON);
+					mouseLastActive = false;
+				}
 				
 				memcpy(&currentKeys, &buffer.keys, 4);
 				memcpy(&circlePad, &buffer.circlePad, 4);
@@ -163,10 +168,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 				if(newpress(KEY_TOUCH)) {
 					lastTouch.x = currentTouch.x;
 					lastTouch.y = currentTouch.y;
-				} else if(mouseLastActive & settings.mouseClick) //if newpress isn't KEY_TOUCH then release Left Mouse Button
-				{
-					mouseLastActive = false;
-					simulateKeyRelease(VK_LBUTTON);
 				}
 				
 				if((currentKeys & KEY_TOUCH)) {
@@ -180,12 +181,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 						}
 					}
 					else if(settings.touch == mouse) {
-						if(settings.mouseClick & !(mouseLastActive)) //only press Left Mouse Button if mouse hasn't moved in the last cycle
-						{
-							mouseLastActive = true;
-							simulateKeyNewpress(VK_LBUTTON);
-						}
-						
 						if(settings.mouseSpeed) {
 							POINT p;
 							GetCursorPos(&p);
@@ -193,6 +188,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 						}
 						else {
 							SetCursorPos((int)((double)currentTouch.x * widthMultiplier), (int)((double)currentTouch.y * heightMultiplier));
+						}
+						
+						if(settings.mouseClick & !(mouseLastActive)) //only press Left Mouse Button if mouse hasn't moved in the last cycle
+						{
+							mouseLastActive = true;
+							simulateKeyNewpress(VK_LBUTTON);
 						}
 					}
 					else if(settings.touch == joystick1) { //made a little bit more accurate to the screen size.

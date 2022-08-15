@@ -3,12 +3,12 @@
 A 3DS homebrew application which allows you to use your 3DS as a wireless controller for Windows.
 
 ### Download
-The latest release will always be downloadable from [here](https://github.com/CTurt/3DSController/releases/).
+The latest release will always be downloadable from [here](https://github.com/marinesciencedude/3DSController/releases/).
 
 If you are updating to 0.6 from an older version, you will need to make sure you update vJoy to the recommended version.
 
 ### Building
-Released version of this fork (https://github.com/marinesciencedude/3DSController/releases/tag/0.7.2-LMB) was built with mingw32-make, using a MinGW installation with the 2013072200 version of mingw32-base-bin package
+Released version of this fork (https://github.com/marinesciencedude/3DSController/releases/tag/0.7.2-rotation) was built with mingw32-make, using a MinGW installation with the 2013072200 version of mingw32-base-bin package
 
 ```
 cd 3DSController-0.7.2\PC

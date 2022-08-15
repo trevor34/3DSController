@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
+#include <math.h>				 
 
 #include "keys.h"
 #include "wireless.h"
@@ -17,6 +18,7 @@ struct settings defaultSettings = {
 	touch: mouse,
 	mouseSpeed: 4,
 	mouseClick: 0,
+	rotation: 0,
 	vJoyDevice: 1,
 	A: { 1, {'A'} },
 	B: { 1, {'B'} },
@@ -165,6 +167,12 @@ bool readSettings(void) {
 	if(getSetting("Mouse Click: ", buffer, setting))
 	{
 		sscanf(setting, "%d", &settings.mouseClick);
+	}
+	
+	if(getSetting("Rotation: ", buffer, setting))
+	{
+		sscanf(setting, "%f", &settings.rotation);
+		settings.rotation *= M_PI / 180;
 	}
 	
 	if(getSetting("vJoy Device: ", buffer, setting)) {

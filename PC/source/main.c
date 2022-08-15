@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "wireless.h"
 #include "keys.h"
@@ -24,6 +25,45 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 	
 	if(!readSettings()) {
 		printf("Couldn't read settings file, using default key bindings.\n");
+	}
+	
+	//determine offsets for rotation to keep input co-ordinates positive
+	float offsetx = 0;
+	float offsety = 0;
+	if(settings.rotation)
+	{
+		//perform rotation of axes on vertices of input co-ordinates rectangle
+		float coordsExtreme[4][2] =
+		{
+			{ 0.0f, 0.0f }, 															//Point (0,0) never gets modified
+			{ 240.0f * sinf(settings.rotation), 240.0f * cosf(settings.rotation) }, 	//Point (0, 240)
+			{ 320.0f * cosf(settings.rotation), -320.0f * sinf(settings.rotation) },	//Point (320, 0)
+			{ 320.0f * cosf(settings.rotation) + 240.0f * sinf(settings.rotation), 
+			-320.0f * sinf(settings.rotation) + 240.0f * cosf(settings.rotation) }, 	//Point (320, 240)
+		};
+		
+		//determine lowest negative co-ordinate
+		for(int i = 0; i < 4; i++)
+		{
+			if((coordsExtreme[i][0] < 0.0f) && (coordsExtreme[i][0] < offsetx)) offsetx = coordsExtreme[i][0];
+			if((coordsExtreme[i][1] < 0.0f) && (coordsExtreme[i][1] < offsety)) offsety = coordsExtreme[i][1];
+		}
+		
+		//determine highest co-ordinate and set width/heightMultiplier again based on it
+		//this will make vertical orientations cover the entire horizontal screen but better than non-right angle rotation values putting the cursor off the screen
+		float highestx = coordsExtreme[0][0];
+		float highesty = coordsExtreme[0][1];
+		for(int i = 0; i < 4; i++)
+		{
+			if(coordsExtreme[i][0] > highestx) highestx = coordsExtreme[i][0];
+			if(coordsExtreme[i][1] > highesty) highesty = coordsExtreme[i][1];
+		}
+		widthMultiplier = screenWidth / (highestx - offsetx);
+		heightMultiplier = screenHeight / (highesty - offsety);
+		
+		//make lowest co-ordinates positive so they can be used as offsets
+		offsetx = fabs(offsetx);
+		offsety = fabs(offsety);
 	}
 	
 	bool vJoy = true;
@@ -119,7 +159,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 			case KEYS:
 				lastKeys = currentKeys;
 				if(currentKeys & KEY_TOUCH) lastTouch = currentTouch;
-				else //if currentKeys is not KEY_TOUCH then release Left Mouse Button
+				//if currentKeys is not KEY_TOUCH then release Left Mouse Button
+				else if(mouseLastActive) //just noticed I did an else if on my local copy and not sure if it changes anything or not compared to plain else
 				{
 					simulateKeyRelease(VK_LBUTTON);
 					mouseLastActive = false;
@@ -171,6 +212,15 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 				}
 				
 				if((currentKeys & KEY_TOUCH)) {
+					//rotate input co-ordinates via rotation of axes method
+					if(settings.rotation)
+					{
+						short currentx = currentTouch.x;
+						short currenty = currentTouch.y;
+						currentTouch.x = currentx * cosf(settings.rotation) + currenty * sinf(settings.rotation) + offsetx;
+						currentTouch.y = -currentx * sinf(settings.rotation) + currenty * cosf(settings.rotation) + offsety;
+					}
+					
 					if(keyboardActive) {
 						if(newpress(KEY_TOUCH)) {
 							char letter = currentKeyboardKey();
@@ -182,6 +232,16 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 					}
 					else if(settings.touch == mouse) {
 						if(settings.mouseSpeed) {
+							//rotate lastTouch values if mouse hasn't moved yet
+							if(settings.rotation && !(mouseLastActive))
+							{
+								printf("lastTouch being rotated\n");
+								short lastx = lastTouch.x;
+								short lasty = lastTouch.y;
+								lastTouch.x = lastx * cosf(settings.rotation) + lasty * sinf(settings.rotation) + offsetx;
+								lastTouch.y = -lastx * sinf(settings.rotation) + lasty * cosf(settings.rotation) + offsety;
+							}
+							
 							POINT p;
 							GetCursorPos(&p);
 							SetCursorPos(p.x + (currentTouch.x - lastTouch.x) * settings.mouseSpeed, p.y + (currentTouch.y - lastTouch.y) * settings.mouseSpeed);
@@ -192,9 +252,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 						
 						if(settings.mouseClick & !(mouseLastActive)) //only press Left Mouse Button if mouse hasn't moved in the last cycle
 						{
-							mouseLastActive = true;
 							simulateKeyNewpress(VK_LBUTTON);
 						}
+						
+						mouseLastActive = true;
 					}
 					else if(settings.touch == joystick1) { //made a little bit more accurate to the screen size.
 						joyX = (int)((float)(currentTouch.x) * 102.3f);

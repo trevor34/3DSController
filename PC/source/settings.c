@@ -10,27 +10,36 @@
 struct settings settings;
 
 struct settings defaultSettings = {
-	port: 8889,
-	throttle: 20,
-	circlePad: joystick1,
-	cStick: joystick2,
-	touch: mouse,
-	mouseSpeed: 4,
-	A: { 1, {'A'} },
-	B: { 1, {'B'} },
-	X: { 1, {'X'} },
-	Y: { 1, {'Y'} },
-	L: { 1, {'L'} },
-	R: { 1, {'R'} },
-	ZL: { 1, {'Q'} },
-	ZR: { 1, {'W'} },
-	Left: { 1, {VK_LEFT} },
-	Right: { 1, {VK_RIGHT} },
-	Up: { 1, {VK_UP} },
-	Down: { 1, {VK_DOWN} },
-	Start: { 1, {VK_RETURN} },
-	Select: { 1, {VK_BACK} },
-	Tap: { 1, {'T'} },
+	port : 8889,
+	throttle : 20,
+	circlePad : joystick1,
+	cStick : joystick2,
+	touch : mouse,
+	mdown : 0,
+	offsetX : 0,
+	offsetY : 0,
+	sizeX : 320,
+	sizeY : 240,
+	minX : 5,
+	minY : 5,
+	maxX : 314,
+	maxY : 234,
+	mouseSpeed : 4,
+	A : {1, {'A'}},
+	B : {1, {'B'}},
+	X : {1, {'X'}},
+	Y : {1, {'Y'}},
+	L : {1, {'L'}},
+	R : {1, {'R'}},
+	ZL : {1, {'Q'}},
+	ZR : {1, {'W'}},
+	Left : {1, {VK_LEFT}},
+	Right : {1, {VK_RIGHT}},
+	Up : {1, {VK_UP}},
+	Down : {1, {VK_DOWN}},
+	Start : {1, {VK_RETURN}},
+	Select : {1, {VK_BACK}},
+	Tap : {1, {'T'}},
 };
 
 static bool getSetting(char *name, char *src, char *dest) {
@@ -119,7 +128,7 @@ bool readSettings(void) {
 	fread(buffer, 1, len, f);
 	
 	char setting[64] = { '\0' };
-	
+
 	if(getSetting("Port: ", buffer, setting)) {
 		sscanf(setting, "%d", &settings.port);
 	}
@@ -149,7 +158,51 @@ bool readSettings(void) {
 	if(getSetting("Mouse Speed: ", buffer, setting)) {
 		sscanf(setting, "%d", &settings.mouseSpeed);
 	}
+	if (getSetting("Touch Click: ", buffer, setting)) 
+	{
+		sscanf(setting, "%d", &settings.mdown);
+	}
+
+	if (getSetting("Offset X: ", buffer, setting))
+	{
+		sscanf(setting, "%d", &settings.offsetX);
+	}
+
+	if (getSetting("Offset Y: ", buffer, setting))
+	{
+		sscanf(setting, "%d", &settings.offsetY);
+	}
+
+	if (getSetting("Size X: ", buffer, setting))
+	{
+		sscanf(setting, "%d", &settings.sizeX);
+	}
+
+	if (getSetting("Size Y: ", buffer, setting))
+	{
+		sscanf(setting, "%d", &settings.sizeY);
+	}
 	
+	if (getSetting("Min X: ", buffer, setting))
+	{
+		sscanf(setting, "%d", &settings.minX);
+	}
+
+	if (getSetting("Min Y: ", buffer, setting))
+	{
+		sscanf(setting, "%d", &settings.minY);
+	}
+
+	if (getSetting("Max X: ", buffer, setting))
+	{
+		sscanf(setting, "%d", &settings.maxX);
+	}
+
+	if (getSetting("Max Y: ", buffer, setting))
+	{
+		sscanf(setting, "%d", &settings.maxY);
+	}
+
 	if(getSetting("A: ", buffer, setting)) settings.A = getButton(setting);
 	if(getSetting("B: ", buffer, setting)) settings.B = getButton(setting);
 	if(getSetting("X: ", buffer, setting)) settings.X = getButton(setting);

@@ -12,7 +12,7 @@ struct cStick cStick;
 struct touch lastTouch;
 struct touch currentTouch;
 
-inline unsigned int mapVirtualKey(unsigned int key) {
+unsigned int mapVirtualKey(unsigned int key) {
 	return MapVirtualKey(key, MAPVK_VK_TO_VSC);
 }
 

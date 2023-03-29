@@ -13,6 +13,15 @@ enum analogue {
 struct settings {
 	int port;
 	int throttle;
+	int mdown;
+	int offsetX;
+	int offsetY;
+	int sizeX;
+	int sizeY;
+	int minX;
+	int minY;
+	int maxX;
+	int maxY;
 	enum analogue circlePad;
 	enum analogue cStick;
 	enum analogue touch;

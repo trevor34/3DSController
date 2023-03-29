@@ -4,7 +4,7 @@ ODIR	:=	build
 SDIR	:=	source
 IDIR	:=	include
 LDIR	:=	lib
-CFLAGS	:=	-I$(IDIR) -fms-extensions -O2 -Wall
+CFLAGS	:=	-I$(IDIR) -fms-extensions -O2 -Wall -m32
 LFLAGS	:=	$(LDIR)/vJoyInterface.lib -lws2_32 -lGdi32 -lgdiplus -static-libgcc
 CFILES	:=	$(wildcard $(SDIR)/*.c)
 OBJS	:=	$(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(wildcard $(SDIR)/*.c))
@@ -30,9 +30,10 @@ $(ODIR)/%.o: $(SDIR)/%.c
 	$(CC) -c -o $@ $< $(CFLAGS) 
 
 $(ODIR):
-	@mkdir $@
+	@mkdir -p $@
 
 .PHONY: clean
 
 clean:
-	rm -f $(TARGET) $(ODIR)/*.o
+	rm -rf $(TARGET) $(ODIR)/*.o
+	rm -rf $(ODIR)

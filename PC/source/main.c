@@ -1,6 +1,6 @@
 // 3DS Controller Server
 
-#define VERSION 0.6
+#define VERSION "0.6a"
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -13,15 +13,13 @@
 #include "settings.h"
 #include "keyboard.h"
 
-int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow) {
-	printf("3DS Controller Server %.1f\n", VERSION);
-	
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
+{
 	DWORD screenWidth = GetSystemMetrics(SM_CXSCREEN);
 	DWORD screenHeight = GetSystemMetrics(SM_CYSCREEN);
-	
-	double widthMultiplier = screenWidth / 320.0;
-	double heightMultiplier = screenHeight / 240.0;
-	
+
+	printf("3DS Controller Server %s\n", VERSION);
+
 	bool vJoy = true;
 	UINT iInterface = 1;
 	
@@ -73,8 +71,21 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 	
 	printf("\n");
 	
+
+	int touchActive = 0;
+	int touchOff = 0;
+
+	if (settings.sizeX == -1)
+		settings.sizeX = screenWidth;
+	if (settings.sizeY == -1)
+		settings.sizeY = screenHeight;
+
+	double slopeX = 1.0 * (settings.sizeX - 0) 
+		/ (settings.maxX - settings.minX);
+	double slopeY = 1.0 * (settings.sizeY - 0) 
+		/ (settings.maxY - settings.minY);
+
 	startListening();
-	
 	while(1) {
 		memset(&buffer, 0, sizeof(struct packet));
 		
@@ -113,8 +124,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 				break;
 			
 			case KEYS:
+				touchActive = 0;
 				lastKeys = currentKeys;
 				if(currentKeys & KEY_TOUCH) lastTouch = currentTouch;
+				
 				
 				memcpy(&currentKeys, &buffer.keys, 4);
 				memcpy(&circlePad, &buffer.circlePad, 4);
@@ -160,8 +173,16 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 							SetCursorPos(p.x + (currentTouch.x - lastTouch.x) * settings.mouseSpeed, p.y + (currentTouch.y - lastTouch.y) * settings.mouseSpeed);
 						}
 						else {
-							SetCursorPos((int)((double)currentTouch.x * widthMultiplier), (int)((double)currentTouch.y * heightMultiplier));
+							// printf("%i %i\n", currentTouch.x, currentTouch.y);
+							SetCursorPos((int)(slopeX * (currentTouch.x - settings.minX) + settings.offsetX), (int)(slopeY * (currentTouch.y - settings.minY) + settings.offsetY));
 						}
+
+						if (settings.mdown && !touchActive)
+						{
+							simulateKeyNewpress(VK_LBUTTON);
+							touchOff = 0;
+						}
+						touchActive = 1;
 					}
 					else if(settings.touch == joystick1) {
 						joyX = (currentTouch.x) * 128;
@@ -218,6 +239,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmd, int nShow)
 		}
 		
 		if(vJoy) updateJoystick();
+
+		if (settings.mdown && !touchActive && !touchOff)
+		{
+			simulateKeyRelease(VK_LBUTTON);
+			touchOff = 1;
+		}
 	}
 	
 	error("accept()");

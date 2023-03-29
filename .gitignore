@@ -7,3 +7,5 @@
 3DS/*.cia
 PC/build/
 PC/*.exe
+.vscode/
+.vs/
